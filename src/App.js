@@ -1,25 +1,87 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react'
+import { io } from 'socket.io-client'
+import './App.css'
 
-function App() {
+//create a socket connection to the server
+const socket = io('https://node-handson-5-backend1.onrender.com')
+
+
+const App = () => {
+
+    const[inputValue, setInputValue] = useState('');
+    const[display, setDisplay] = useState('')
+
+    useEffect(()=>{
+        socket.on('Client',(data)=>{
+            console.log(data,"data")
+            setDisplay(data)
+        })
+
+        socket.on('sendtoall',(data)=>{
+            console.log(data,"data")
+            setDisplay(data)
+        })
+
+        socket.on('exclusive',(data)=>{
+            console.log(data,"data")
+            setDisplay(data)
+        })
+
+        socket.on('JoinRoom',(data)=>{
+            console.log(data)
+            // alert(data)
+            setDisplay(data)
+        })
+
+        socket.on('sendtoroomdata',(data)=>{
+            console.log(data)
+        })
+
+    },[])
+    
+    const handleSendMsg=()=>{
+        socket.emit('MESSAGE', inputValue)
+    }
+
+    const handleBroardcast=()=>{
+        socket.emit('BROADCAST',inputValue)
+    }
+
+    const handleExclusiveBroardcast=()=>{
+        socket.emit('EXCLUSIVEBROADCAST',inputValue)
+    }
+
+    const handleJoinRoom=()=>{
+        let roomName = prompt("Please Enter the room name:")
+        socket.emit('JOINROOM',roomName)
+    }
+
+    const handleSendMsgtoRoom=()=>{
+        socket.emit('SENDTOROOM',inputValue)
+    }
+    
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='container'>
+      <h1>Chat App</h1>
+      <br/>
+        <input type='text' value={inputValue} onChange={(e)=>setInputValue(e.target.value)}/>
+        <hr/>
+        <div className='innerDiv'>
+            <button onClick={handleSendMsg}>Send Message</button>
+            <hr/>
+            <button onClick={handleBroardcast}>Send to All participants</button>
+            <hr/>
+            <button onClick={handleExclusiveBroardcast}>EXCLUSIVE BROADCAST</button>
+            <hr/>
+            <button onClick={handleJoinRoom}>Join Room</button>
+            <hr/>
+            <button onClick={handleSendMsgtoRoom}>Send msg to Room</button>
+        </div>  
+        
+        <h1>msg: {display}</h1>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
